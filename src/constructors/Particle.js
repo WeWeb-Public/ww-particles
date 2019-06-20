@@ -1,29 +1,29 @@
-class Particle {
+export default class Particle {
     constructor(particle = {}) {
         this.pJS = particle.pJS
         /* size */
-        this.radius = (pJS.particles.size.random ? Math.random() : 1) * pJS.particles.size.value;
-        if (pJS.particles.size.anim.enable) {
+        this.radius = (this.pJS.particles.size.random ? Math.random() : 1) * this.pJS.particles.size.value;
+        if (this.pJS.particles.size.anim.enable) {
             this.size_status = false;
-            this.vs = pJS.particles.size.anim.speed / 100;
-            if (!pJS.particles.size.anim.sync) {
+            this.vs = this.pJS.particles.size.anim.speed / 100;
+            if (!this.pJS.particles.size.anim.sync) {
                 this.vs = this.vs * Math.random();
             }
         }
 
         /* position */
-        this.x = position ? position.x : Math.random() * pJS.canvas.w;
-        this.y = position ? position.y : Math.random() * pJS.canvas.h;
+        this.x = position ? position.x : Math.random() * this.pJS.canvas.w;
+        this.y = position ? position.y : Math.random() * this.pJS.canvas.h;
 
         /* check position  - into the canvas */
-        if (this.x > pJS.canvas.w - this.radius * 2) this.x = this.x - this.radius;
+        if (this.x > this.pJS.canvas.w - this.radius * 2) this.x = this.x - this.radius;
         else if (this.x < this.radius * 2) this.x = this.x + this.radius;
-        if (this.y > pJS.canvas.h - this.radius * 2) this.y = this.y - this.radius;
+        if (this.y > this.pJS.canvas.h - this.radius * 2) this.y = this.y - this.radius;
         else if (this.y < this.radius * 2) this.y = this.y + this.radius;
 
         /* check position - avoid overlap */
-        if (pJS.particles.move.bounce) {
-            pJS.fn.vendors.checkOverlap(this, position);
+        if (this.pJS.particles.move.bounce) {
+            this.pJS.vendors.checkOverlap(this, position);
         }
 
         /* color */
@@ -31,7 +31,7 @@ class Particle {
         if (typeof (color.value) == 'object') {
 
             if (color.value instanceof Array) {
-                var color_selected = color.value[Math.floor(Math.random() * pJS.particles.color.value.length)];
+                let color_selected = color.value[Math.floor(Math.random() * this.pJS.particles.color.value.length)];
                 this.color.rgb = hexToRgb(color_selected);
             } else {
                 if (color.value.r != undefined && color.value.g != undefined && color.value.b != undefined) {
@@ -64,18 +64,18 @@ class Particle {
         }
 
         /* opacity */
-        this.opacity = (pJS.particles.opacity.random ? Math.random() : 1) * pJS.particles.opacity.value;
-        if (pJS.particles.opacity.anim.enable) {
+        this.opacity = (this.pJS.particles.opacity.random ? Math.random() : 1) * this.pJS.particles.opacity.value;
+        if (this.pJS.particles.opacity.anim.enable) {
             this.opacity_status = false;
-            this.vo = pJS.particles.opacity.anim.speed / 100;
-            if (!pJS.particles.opacity.anim.sync) {
+            this.vo = this.pJS.particles.opacity.anim.speed / 100;
+            if (!this.pJS.particles.opacity.anim.sync) {
                 this.vo = this.vo * Math.random();
             }
         }
 
         /* animation - velocity for speed */
-        var velbase = {}
-        switch (pJS.particles.move.direction) {
+        let velbase = {}
+        switch (this.pJS.particles.move.direction) {
             case 'top':
                 velbase = { x: 0, y: -1 };
                 break;
@@ -105,7 +105,7 @@ class Particle {
                 break;
         }
 
-        if (pJS.particles.move.straight) {
+        if (this.pJS.particles.move.straight) {
             this.vx = velbase.x;
             this.vy = velbase.y;
             if (pJS.particles.move.random) {
@@ -128,10 +128,10 @@ class Particle {
 
         /* if shape is image */
 
-        var shape_type = pJS.particles.shape.type;
+        let shape_type = pJS.particles.shape.type;
         if (typeof (shape_type) == 'object') {
             if (shape_type instanceof Array) {
-                var shape_selected = shape_type[Math.floor(Math.random() * shape_type.length)];
+                let shape_selected = shape_type[Math.floor(Math.random() * shape_type.length)];
                 this.shape = shape_selected;
             }
         } else {
@@ -139,15 +139,15 @@ class Particle {
         }
 
         if (this.shape == 'image') {
-            var sh = pJS.particles.shape;
+            let sh = this.pJS.particles.shape;
             this.img = {
                 src: sh.image.src,
                 ratio: sh.image.width / sh.image.height
             }
             if (!this.img.ratio) this.img.ratio = 1;
-            if (pJS.tmp.img_type == 'svg' && pJS.tmp.source_svg != undefined) {
-                pJS.fn.vendors.createSvgImg(this);
-                if (pJS.tmp.pushing) {
+            if (this.pJS.tmp.img_type == 'svg' && this.pJS.tmp.source_svg != undefined) {
+                this.pJS.fn.vendors.createSvgImg(this);
+                if (this.pJS.tmp.pushing) {
                     this.img.loaded = false;
                 }
             }
@@ -156,60 +156,60 @@ class Particle {
 
     draw() {
         let p = this;
-
+        let radius
         if (p.radius_bubble != undefined) {
-            var radius = p.radius_bubble;
+            radius = p.radius_bubble;
         } else {
-            var radius = p.radius;
+            radius = p.radius;
         }
-
+        let opacity
         if (p.opacity_bubble != undefined) {
-            var opacity = p.opacity_bubble;
+            opacity = p.opacity_bubble;
         } else {
-            var opacity = p.opacity;
+            opacity = p.opacity;
         }
-
+        let color_value
         if (p.color.rgb) {
-            var color_value = 'rgba(' + p.color.rgb.r + ',' + p.color.rgb.g + ',' + p.color.rgb.b + ',' + opacity + ')';
+            color_value = 'rgba(' + p.color.rgb.r + ',' + p.color.rgb.g + ',' + p.color.rgb.b + ',' + opacity + ')';
         } else {
-            var color_value = 'hsla(' + p.color.hsl.h + ',' + p.color.hsl.s + '%,' + p.color.hsl.l + '%,' + opacity + ')';
+            color_value = 'hsla(' + p.color.hsl.h + ',' + p.color.hsl.s + '%,' + p.color.hsl.l + '%,' + opacity + ')';
         }
 
-        pJS.canvas.ctx.fillStyle = color_value;
-        pJS.canvas.ctx.beginPath();
+        this.pJS.canvas.ctx.fillStyle = color_value;
+        this.pJS.canvas.ctx.beginPath();
 
         switch (p.shape) {
 
             case 'circle':
-                pJS.canvas.ctx.arc(p.x, p.y, radius, 0, Math.PI * 2, false);
+                this.pJS.canvas.ctx.arc(p.x, p.y, radius, 0, Math.PI * 2, false);
                 break;
 
             case 'edge':
-                pJS.canvas.ctx.rect(p.x - radius, p.y - radius, radius * 2, radius * 2);
+                this.pJS.canvas.ctx.rect(p.x - radius, p.y - radius, radius * 2, radius * 2);
                 break;
 
             case 'triangle':
-                pJS.fn.vendors.drawShape(pJS.canvas.ctx, p.x - radius, p.y + radius / 1.66, radius * 2, 3, 2);
+                this.pJS.fn.vendors.drawShape(pJS.canvas.ctx, p.x - radius, p.y + radius / 1.66, radius * 2, 3, 2);
                 break;
 
             case 'polygon':
-                pJS.fn.vendors.drawShape(
-                    pJS.canvas.ctx,
-                    p.x - radius / (pJS.particles.shape.polygon.nb_sides / 3.5), // startX
+                this.pJS.fn.vendors.drawShape(
+                    this.pJS.canvas.ctx,
+                    p.x - radius / (this.pJS.particles.shape.polygon.nb_sides / 3.5), // startX
                     p.y - radius / (2.66 / 3.5), // startY
-                    radius * 2.66 / (pJS.particles.shape.polygon.nb_sides / 3), // sideLength
-                    pJS.particles.shape.polygon.nb_sides, // sideCountNumerator
+                    radius * 2.66 / (this.pJS.particles.shape.polygon.nb_sides / 3), // sideLength
+                    this.pJS.particles.shape.polygon.nb_sides, // sideCountNumerator
                     1 // sideCountDenominator
                 );
                 break;
 
             case 'star':
-                pJS.fn.vendors.drawShape(
-                    pJS.canvas.ctx,
-                    p.x - radius * 2 / (pJS.particles.shape.polygon.nb_sides / 4), // startX
+                this.pJS.fn.vendors.drawShape(
+                    this.pJS.canvas.ctx,
+                    p.x - radius * 2 / (this.pJS.particles.shape.polygon.nb_sides / 4), // startX
                     p.y - radius / (2 * 2.66 / 3.5), // startY
-                    radius * 2 * 2.66 / (pJS.particles.shape.polygon.nb_sides / 3), // sideLength
-                    pJS.particles.shape.polygon.nb_sides, // sideCountNumerator
+                    radius * 2 * 2.66 / (this.pJS.particles.shape.polygon.nb_sides / 3), // sideLength
+                    this.pJS.particles.shape.polygon.nb_sides, // sideCountNumerator
                     2 // sideCountDenominator
                 );
                 break;
@@ -217,7 +217,7 @@ class Particle {
             case 'image':
 
                 function draw() {
-                    pJS.canvas.ctx.drawImage(
+                    this.pJS.canvas.ctx.drawImage(
                         img_obj,
                         p.x - radius,
                         p.y - radius,
@@ -225,11 +225,11 @@ class Particle {
                         radius * 2 / p.img.ratio
                     );
                 }
-
-                if (pJS.tmp.img_type == 'svg') {
-                    var img_obj = p.img.obj;
+                let img_obj
+                if (this.pJS.tmp.img_type == 'svg') {
+                    img_obj = p.img.obj;
                 } else {
-                    var img_obj = pJS.tmp.img_obj;
+                    img_obj = pJS.tmp.img_obj;
                 }
 
                 if (img_obj) {
@@ -240,15 +240,15 @@ class Particle {
 
         }
 
-        pJS.canvas.ctx.closePath();
+        this.pJS.canvas.ctx.closePath();
 
-        if (pJS.particles.shape.stroke.width > 0) {
-            pJS.canvas.ctx.strokeStyle = pJS.particles.shape.stroke.color;
-            pJS.canvas.ctx.lineWidth = pJS.particles.shape.stroke.width;
-            pJS.canvas.ctx.stroke();
+        if (this.pJS.particles.shape.stroke.width > 0) {
+            this.pJS.canvas.ctx.strokeStyle = this.pJS.particles.shape.stroke.color;
+            this.pJS.canvas.ctx.lineWidth = this.pJS.particles.shape.stroke.width;
+            this.pJS.canvas.ctx.stroke();
         }
 
-        pJS.canvas.ctx.fill();
+        this.pJS.canvas.ctx.fill();
 
     }
 

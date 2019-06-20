@@ -1,4 +1,4 @@
-import wwObject from './wwObjectMap.vue'
+import wwObject from './wwObjectParticles.vue'
 
 const name = "__NAME__";
 const version = '__VERSION__';
