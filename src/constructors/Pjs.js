@@ -159,7 +159,6 @@ export default class Pjs {
         this.retina_detect = retina_detect
         if (pjs.params.retina_detect) Object.deepExtend(this.retina_detect, pjs.params.retina_detect);
 
-        console.log('TRALALAL :', this.particles, this.interactivity, this.retina_detect)
         this.tmp = {}
         this.tmp.obj = {
             size_value: this.particles.size.value,
@@ -580,7 +579,6 @@ export default class Pjs {
 
     /* ---------- Vendors functions  ------------ */
     eventsListeners() {
-        console.log('eventsListeners', this)
         /* events target element */
         if (this.interactivity.detect_on == 'window') {
             this.interactivity.el = this.window;
