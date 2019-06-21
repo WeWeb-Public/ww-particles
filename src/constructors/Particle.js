@@ -1,3 +1,4 @@
+import utils from '../utils'
 export default class Particle {
     constructor(particle = {}) {
         this.pJS = particle.pJS
@@ -12,6 +13,7 @@ export default class Particle {
         }
 
         /* position */
+        let position = particle.position;
         this.x = position ? position.x : Math.random() * this.pJS.canvas.w;
         this.y = position ? position.y : Math.random() * this.pJS.canvas.h;
 
@@ -23,16 +25,16 @@ export default class Particle {
 
         /* check position - avoid overlap */
         if (this.pJS.particles.move.bounce) {
-            this.pJS.vendors.checkOverlap(this, position);
+            this.pJS.checkOverlap(this, position);
         }
 
         /* color */
-        this.color = {};
+        let color = particle.color;
         if (typeof (color.value) == 'object') {
 
             if (color.value instanceof Array) {
                 let color_selected = color.value[Math.floor(Math.random() * this.pJS.particles.color.value.length)];
-                this.color.rgb = hexToRgb(color_selected);
+                this.color.rgb = utils.hexToRgb(color_selected);
             } else {
                 if (color.value.r != undefined && color.value.g != undefined && color.value.b != undefined) {
                     this.color.rgb = {
@@ -60,7 +62,7 @@ export default class Particle {
         }
         else if (typeof (color.value) == 'string') {
             this.color = color;
-            this.color.rgb = hexToRgb(this.color.value);
+            this.color.rgb = utils.hexToRgb(this.color.value);
         }
 
         /* opacity */
@@ -108,7 +110,7 @@ export default class Particle {
         if (this.pJS.particles.move.straight) {
             this.vx = velbase.x;
             this.vy = velbase.y;
-            if (pJS.particles.move.random) {
+            if (this.pJS.particles.move.random) {
                 this.vx = this.vx * (Math.random());
                 this.vy = this.vy * (Math.random());
             }
@@ -128,7 +130,7 @@ export default class Particle {
 
         /* if shape is image */
 
-        let shape_type = pJS.particles.shape.type;
+        let shape_type = this.pJS.particles.shape.type;
         if (typeof (shape_type) == 'object') {
             if (shape_type instanceof Array) {
                 let shape_selected = shape_type[Math.floor(Math.random() * shape_type.length)];
@@ -146,7 +148,7 @@ export default class Particle {
             }
             if (!this.img.ratio) this.img.ratio = 1;
             if (this.pJS.tmp.img_type == 'svg' && this.pJS.tmp.source_svg != undefined) {
-                this.pJS.fn.vendors.createSvgImg(this);
+                this.pJS.createSvgImg(this);
                 if (this.pJS.tmp.pushing) {
                     this.img.loaded = false;
                 }
@@ -189,11 +191,11 @@ export default class Particle {
                 break;
 
             case 'triangle':
-                this.pJS.fn.vendors.drawShape(pJS.canvas.ctx, p.x - radius, p.y + radius / 1.66, radius * 2, 3, 2);
+                this.pJS.drawShape(this.pJS.canvas.ctx, p.x - radius, p.y + radius / 1.66, radius * 2, 3, 2);
                 break;
 
             case 'polygon':
-                this.pJS.fn.vendors.drawShape(
+                this.pJS.drawShape(
                     this.pJS.canvas.ctx,
                     p.x - radius / (this.pJS.particles.shape.polygon.nb_sides / 3.5), // startX
                     p.y - radius / (2.66 / 3.5), // startY
@@ -204,7 +206,7 @@ export default class Particle {
                 break;
 
             case 'star':
-                this.pJS.fn.vendors.drawShape(
+                this.pJS.drawShape(
                     this.pJS.canvas.ctx,
                     p.x - radius * 2 / (this.pJS.particles.shape.polygon.nb_sides / 4), // startX
                     p.y - radius / (2 * 2.66 / 3.5), // startY
@@ -216,7 +218,7 @@ export default class Particle {
 
             case 'image':
 
-                function draw() {
+                function _draw() {
                     this.pJS.canvas.ctx.drawImage(
                         img_obj,
                         p.x - radius,
@@ -229,11 +231,11 @@ export default class Particle {
                 if (this.pJS.tmp.img_type == 'svg') {
                     img_obj = p.img.obj;
                 } else {
-                    img_obj = pJS.tmp.img_obj;
+                    img_obj = this.pJS.tmp.img_obj;
                 }
 
                 if (img_obj) {
-                    draw();
+                    _draw();
                 }
 
                 break;

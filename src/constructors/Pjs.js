@@ -1,4 +1,5 @@
 import Particle from './Particle'
+import utils from '../utils'
 const particlesConfig = {
     number: {
         value: 400,
@@ -108,28 +109,32 @@ const interactivity = {
 }
 const retina_detect = false
 
-function hexToRgb(hex) {
-    // By Tim Down - http://stackoverflow.com/a/5624139/3493650
-    // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
-    var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-    hex = hex.replace(shorthandRegex, function (m, r, g, b) {
-        return r + r + g + g + b + b;
-    });
-    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16)
-    } : null;
+Object.deepExtend = function deepExtendFunction(destination, source) {
+    for (var property in source) {
+        if (source[property] && source[property].constructor &&
+            source[property].constructor === Object) {
+            destination[property] = destination[property] || {};
+            deepExtendFunction(destination[property], source[property]);
+        } else {
+            destination[property] = source[property];
+        }
+    }
+    return destination;
 };
 
-function clamp(number, min, max) {
-    return Math.min(Math.max(number, min), max);
+Object.deepExtend = function deepExtendFunction(destination, source) {
+    for (var property in source) {
+        if (source[property] && source[property].constructor &&
+            source[property].constructor === Object) {
+            destination[property] = destination[property] || {};
+            deepExtendFunction(destination[property], source[property]);
+        } else {
+            destination[property] = source[property];
+        }
+    }
+    return destination;
 };
 
-function isInArray(value, array) {
-    return array.indexOf(value) > -1;
-}
 
 export default class Pjs {
     constructor(pjs = {}) {
@@ -145,10 +150,16 @@ export default class Pjs {
             w: this.canvas_el.offsetWidth,
             h: this.canvas_el.offsetHeight
         }
-        this.particles = pjs.particles || particlesConfig
-        this.interactivity = pjs.interactivity || interactivity
-        this.retina_detect = pjs.retina_detect || retina_detect
-        console.log('TRALALAL :', this.interactivity)
+        this.particles = particlesConfig
+        if (pjs.params.particles) Object.deepExtend(this.particles, pjs.params.particles);
+
+        this.interactivity = interactivity
+        if (pjs.params.interactivity) Object.deepExtend(this.interactivity, pjs.params.interactivity);
+
+        this.retina_detect = retina_detect
+        if (pjs.params.retina_detect) Object.deepExtend(this.retina_detect, pjs.params.retina_detect);
+
+        console.log('TRALALAL :', this.particles, this.interactivity, this.retina_detect)
         this.tmp = {}
         this.tmp.obj = {
             size_value: this.particles.size.value,
@@ -166,23 +177,23 @@ export default class Pjs {
         this.size_status = false
         this.vs = 0
 
-        this.window.requestAnimFrame = (function () {
-            return window.requestAnimationFrame ||
-                window.webkitRequestAnimationFrame ||
-                window.mozRequestAnimationFrame ||
-                window.oRequestAnimationFrame ||
-                window.msRequestAnimationFrame ||
+        this.window.requestAnimFrame = (() => {
+            return this.window.requestAnimationFrame ||
+                this.window.webkitRequestAnimationFrame ||
+                this.window.mozRequestAnimationFrame ||
+                this.window.oRequestAnimationFrame ||
+                this.window.msRequestAnimationFrame ||
                 function (callback) {
                     window.setTimeout(callback, 1000 / 60);
                 };
         })()
 
-        this.window.cancelRequestAnimFrame = (function () {
-            return window.cancelAnimationFrame ||
-                window.webkitCancelRequestAnimationFrame ||
-                window.mozCancelRequestAnimationFrame ||
-                window.oCancelRequestAnimationFrame ||
-                window.msCancelRequestAnimationFrame ||
+        this.window.cancelRequestAnimFrame = (() => {
+            return this.window.cancelAnimationFrame ||
+                this.window.webkitCancelRequestAnimationFrame ||
+                this.window.mozCancelRequestAnimationFrame ||
+                this.window.oCancelRequestAnimationFrame ||
+                this.window.msCancelRequestAnimationFrame ||
                 clearTimeout
         })()
 
@@ -274,14 +285,15 @@ export default class Pjs {
 
         for (let i = 0; i < nb; i++) {
             this.particles.array.push(
-                new Particle(
-                    this.particles.color,
-                    this.particles.opacity.value,
-                    {
-                        'x': pos ? pos.pos_x : Math.random() * pJS.canvas.w,
-                        'y': pos ? pos.pos_y : Math.random() * pJS.canvas.h
+                new Particle({
+                    pJS: this,
+                    color: this.particles.color,
+                    opacity: this.particles.opacity.value,
+                    position: {
+                        'x': pos ? pos.pos_x : Math.random() * this.canvas.w,
+                        'y': pos ? pos.pos_y : Math.random() * this.canvas.h
                     }
-                )
+                })
             )
             if (i == nb - 1) {
                 if (!this.particles.move.enable) {
@@ -445,7 +457,7 @@ export default class Pjs {
             let normVec = { x: dx_mouse / dist_mouse, y: dy_mouse / dist_mouse },
                 repulseRadius = this.interactivity.modes.repulse.distance,
                 velocity = 100,
-                repulseFactor = clamp((1 / repulseRadius) * (-1 * Math.pow(dist_mouse / repulseRadius, 2) + 1) * repulseRadius * velocity, 0, 50);
+                repulseFactor = utils.clamp((1 / repulseRadius) * (-1 * Math.pow(dist_mouse / repulseRadius, 2) + 1) * repulseRadius * velocity, 0, 50);
 
             let pos = {
                 x: p.x + normVec.x * repulseFactor,
@@ -453,7 +465,7 @@ export default class Pjs {
             }
 
             if (pJS.particles.move.out_mode == 'bounce') {
-                if (pos.x - p.radius > 0 && pos.x + p.radius < pthisJS.canvas.w) p.x = pos.x;
+                if (pos.x - p.radius > 0 && pos.x + p.radius < this.canvas.w) p.x = pos.x;
                 if (pos.y - p.radius > 0 && pos.y + p.radius < this.canvas.h) p.y = pos.y;
             } else {
                 p.x = pos.x;
@@ -541,7 +553,7 @@ export default class Pjs {
             /* draw a line between the cursor and the particle if the distance between them is under the config distance */
             if (dist_mouse <= this.interactivity.modes.grab.distance) {
 
-                let opacity_line = pthisJS.interactivity.modes.grab.line_linked.opacity - (dist_mouse / (1 / pJS.interactivity.modes.grab.line_linked.opacity)) / pJS.interactivity.modes.grab.distance;
+                let opacity_line = this.interactivity.modes.grab.line_linked.opacity - (dist_mouse / (1 / this.interactivity.modes.grab.line_linked.opacity)) / this.interactivity.modes.grab.distance;
 
                 if (opacity_line > 0) {
 
@@ -554,7 +566,7 @@ export default class Pjs {
                     /* path */
                     this.canvas.ctx.beginPath();
                     this.canvas.ctx.moveTo(p.x, p.y);
-                    this.canvas.ctx.lineTo(pJS.interactivity.mouse.pos_x, pJS.interactivity.mouse.pos_y);
+                    this.canvas.ctx.lineTo(this.interactivity.mouse.pos_x, this.interactivity.mouse.pos_y);
                     this.canvas.ctx.stroke();
                     this.canvas.ctx.closePath();
 
@@ -581,7 +593,7 @@ export default class Pjs {
         if (this.interactivity.events.onhover.enable || this.interactivity.events.onclick.enable) {
 
             /* el on mousemove */
-            this.interactivity.el.addEventListener('mousemove', function (e) {
+            this.interactivity.el.addEventListener('mousemove', (e) => {
 
                 let pos_x, pos_y
                 if (this.interactivity.el == this.window) {
@@ -606,7 +618,7 @@ export default class Pjs {
             });
 
             /* el on onmouseleave */
-            this.interactivity.el.addEventListener('mouseleave', function (e) {
+            this.interactivity.el.addEventListener('mouseleave', (e) => {
 
                 this.interactivity.mouse.pos_x = null;
                 this.interactivity.mouse.pos_y = null;
@@ -619,7 +631,7 @@ export default class Pjs {
         /* on click event */
         if (this.interactivity.events.onclick.enable) {
 
-            this.interactivity.el.addEventListener('click', function () {
+            this.interactivity.el.addEventListener('click', () => {
 
                 this.interactivity.mouse.click_pos_x = this.interactivity.mouse.pos_x;
                 this.interactivity.mouse.click_pos_y = this.interactivity.mouse.pos_y;
@@ -675,7 +687,7 @@ export default class Pjs {
 
             /* calc area */
             let area = this.canvas.el.width * this.canvas.el.height / 1000;
-            if (pJS.tmp.retina) {
+            if (this.tmp.retina) {
                 area = area / (this.canvas.pxratio * 2);
             }
 
@@ -709,7 +721,7 @@ export default class Pjs {
         /* set color to svg element */
         let svgXml = this.tmp.source_svg,
             rgbHex = /#([0-9A-F]{3,6})/gi,
-            coloredSvgXml = svgXml.replace(rgbHex, function (m, r, g, b) {
+            coloredSvgXml = svgXml.replace(rgbHex, (m, r, g, b) => {
                 if (p.color.rgb) {
                     var color_value = 'rgba(' + p.color.rgb.r + ',' + p.color.rgb.g + ',' + p.color.rgb.b + ',' + p.opacity + ')';
                 } else {
@@ -725,7 +737,7 @@ export default class Pjs {
 
         /* create particle img obj */
         let img = new Image();
-        img.addEventListener('load', function () {
+        img.addEventListener('load', () => {
             p.img.obj = img;
             p.img.loaded = true;
             DOMURL.revokeObjectURL(url);
@@ -735,7 +747,7 @@ export default class Pjs {
 
     }
     destroypJS() {
-        this.window.cancelAnimationFrame(this.drawAnimFrame);
+        this.window.cancelAnimationFrame(this.drawAnimFrame.bind(this));
         canvas_el.remove();
         this.pJSDom = null;
     }
@@ -773,7 +785,7 @@ export default class Pjs {
 
                 let xhr = new XMLHttpRequest();
                 xhr.open('GET', this.particles.shape.image.src);
-                xhr.onreadystatechange = function (data) {
+                xhr.onreadystatechange = (data) => {
                     if (xhr.readyState == 4) {
                         if (xhr.status == 200) {
                             this.tmp.source_svg = data.currentTarget.response;
@@ -789,7 +801,7 @@ export default class Pjs {
             } else {
 
                 var img = new Image();
-                img.addEventListener('load', function () {
+                img.addEventListener('load', () => {
                     this.tmp.img_obj = img;
                     this.checkBeforeDraw();
                 });
@@ -804,36 +816,35 @@ export default class Pjs {
 
     }
     draw() {
-
         if (this.particles.shape.type == 'image') {
 
             if (this.tmp.img_type == 'svg') {
 
                 if (this.tmp.count_svg >= this.particles.number.value) {
                     this.particlesDraw();
-                    if (!this.particles.move.enable) this.window.cancelRequestAnimFrame(this.drawAnimFrame);
-                    else this.drawAnimFrame = this.window.requestAnimFrame(this.draw);
+                    if (!this.particles.move.enable) this.window.cancelRequestAnimFrame(this.drawAnimFrame.bind(this));
+                    else this.drawAnimFrame = this.window.requestAnimFrame(this.draw.bind(this));
                 } else {
                     //console.log('still loading...');
-                    if (!this.tmp.img_error) this.drawAnimFrame = this.window.requestAnimFrame(this.draw);
+                    if (!this.tmp.img_error) this.drawAnimFrame = this.window.requestAnimFrame(this.draw.bind(this));
                 }
 
             } else {
 
                 if (this.tmp.img_obj != undefined) {
                     this.particlesDraw();
-                    if (!this.particles.move.enable) this.window.cancelRequestAnimFrame(pJS.fn.drawAnimFrame);
+                    if (!this.particles.move.enable) this.window.cancelRequestAnimFrame(pJS.fn.drawAnimFrame.bind(this));
                     else this.drawAnimFrame = this.window.requestAnimFrame(this.draw);
                 } else {
-                    if (!this.tmp.img_error) this.drawAnimFrame = this.window.requestAnimFrame(this.draw);
+                    if (!this.tmp.img_error) this.drawAnimFrame = this.window.requestAnimFrame(this.draw.bind(this));
                 }
 
             }
 
         } else {
             this.particlesDraw();
-            if (!this.particles.move.enable) this.window.cancelRequestAnimFrame(this.drawAnimFrame);
-            else this.drawAnimFrame = this.window.requestAnimFrame(this.draw);
+            if (!this.particles.move.enable) this.window.cancelRequestAnimFrame(this.drawAnimFrame.bind(this));
+            else this.drawAnimFrame = this.window.requestAnimFrame(this.draw.bind(this));
         }
 
     }
@@ -843,10 +854,10 @@ export default class Pjs {
         if (this.particles.shape.type == 'image') {
 
             if (this.tmp.img_type == 'svg' && this.tmp.source_svg == undefined) {
-                this.tmp.checkAnimFrame = this.window.requestAnimFrame(check);
+                this.tmp.checkAnimFrame = this.window.requestAnimFrame(check.bind(this));
             } else {
-                //console.log('images loaded! cancel check');
-                this.window.cancelRequestAnimFrame(this.checkAnimFrame);
+                console.log('images loaded! cancel check');
+                this.window.cancelRequestAnimFrame(this.checkAnimFrame.bind(this));
                 if (!this.tmp.img_error) {
                     this.init();
                     this.draw();
@@ -871,11 +882,11 @@ export default class Pjs {
         this.densityAutoParticles();
 
         /* particles.line_linked - convert hex colors to rgb */
-        this.particles.line_linked.color_rgb_line = hexToRgb(this.particles.line_linked.color);
+        this.particles.line_linked.color_rgb_line = utils.hexToRgb(this.particles.line_linked.color);
 
     }
     start() {
-        if (isInArray('image', this.particles.shape.type)) {
+        if (utils.isInArray('image', this.particles.shape.type)) {
             this.tmp.img_type = this.particles.shape.image.src.substr(this.particles.shape.image.src.length - 3);
             this.loadImg(pJS.tmp.img_type);
         } else {
@@ -954,7 +965,7 @@ export default class Pjs {
         }, 1000)
 
         if (this.interactivity.events.resize) {
-            this.window.addEventListener('resize', this.canvasResize);
+            this.window.addEventListener('resize', this.canvasResize.bind(this));
         }
 
     };
@@ -963,7 +974,7 @@ export default class Pjs {
 
     particlesCreate() {
         for (let i = 0; i < this.particles.number.value; i++) {
-            this.particles.array.push(new Particle({ pJS: this, color: this.particles.color, opacity: this.particles.opacity.value, position: '' }));
+            this.particles.array.push(new Particle({ pJS: this, color: this.particles.color, opacity: this.particles.opacity.value }));
         }
     }
     particlesUpdate() {
@@ -983,7 +994,7 @@ export default class Pjs {
 
             /* move the particle */
             if (this.particles.move.enable) {
-                var ms = pJS.particles.move.speed / 2;
+                var ms = this.particles.move.speed / 2;
                 p.x += p.vx * ms;
                 p.y += p.vy * ms;
             }
@@ -1017,56 +1028,56 @@ export default class Pjs {
             if (this.particles.move.out_mode == 'bounce') {
                 new_pos = {
                     x_left: p.radius,
-                    x_right: pJS.canvas.w,
+                    x_right: this.canvas.w,
                     y_top: p.radius,
-                    y_bottom: pJS.canvas.h
+                    y_bottom: this.canvas.h
                 }
             } else {
                 new_pos = {
                     x_left: -p.radius,
-                    x_right: pJS.canvas.w + p.radius,
+                    x_right: this.canvas.w + p.radius,
                     y_top: -p.radius,
-                    y_bottom: pJS.canvas.h + p.radius
+                    y_bottom: this.canvas.h + p.radius
                 }
             }
 
-            if (p.x - p.radius > pJS.canvas.w) {
+            if (p.x - p.radius > this.canvas.w) {
                 p.x = new_pos.x_left;
-                p.y = Math.random() * pJS.canvas.h;
+                p.y = Math.random() * this.canvas.h;
             }
             else if (p.x + p.radius < 0) {
                 p.x = new_pos.x_right;
-                p.y = Math.random() * pJS.canvas.h;
+                p.y = Math.random() * this.canvas.h;
             }
-            if (p.y - p.radius > pJS.canvas.h) {
+            if (p.y - p.radius > this.canvas.h) {
                 p.y = new_pos.y_top;
-                p.x = Math.random() * pJS.canvas.w;
+                p.x = Math.random() * this.canvas.w;
             }
             else if (p.y + p.radius < 0) {
                 p.y = new_pos.y_bottom;
-                p.x = Math.random() * pJS.canvas.w;
+                p.x = Math.random() * this.canvas.w;
             }
 
             /* out of canvas modes */
             switch (this.particles.move.out_mode) {
                 case 'bounce':
-                    if (p.x + p.radius > pJS.canvas.w) p.vx = -p.vx;
+                    if (p.x + p.radius > this.canvas.w) p.vx = -p.vx;
                     else if (p.x - p.radius < 0) p.vx = -p.vx;
-                    if (p.y + p.radius > pJS.canvas.h) p.vy = -p.vy;
+                    if (p.y + p.radius > this.canvas.h) p.vy = -p.vy;
                     else if (p.y - p.radius < 0) p.vy = -p.vy;
                     break;
             }
 
             /* events */
-            if (isInArray('grab', this.interactivity.events.onhover.mode)) {
+            if (utils.isInArray('grab', this.interactivity.events.onhover.mode)) {
                 this.grabParticle(p);
             }
 
-            if (isInArray('bubble', this.interactivity.events.onhover.mode) || isInArray('bubble', this.interactivity.events.onclick.mode)) {
+            if (utils.isInArray('bubble', this.interactivity.events.onhover.mode) || utils.isInArray('bubble', this.interactivity.events.onclick.mode)) {
                 this.bubbleParticle(p);
             }
 
-            if (isInArray('repulse', this.interactivity.events.onhover.mode) || isInArray('repulse', this.interactivity.events.onclick.mode)) {
+            if (utils.isInArray('repulse', this.interactivity.events.onhover.mode) || utils.isInArray('repulse', this.interactivity.events.onclick.mode)) {
                 this.repulseParticle(p);
             }
 
@@ -1119,8 +1130,8 @@ export default class Pjs {
     particlesRefresh() {
 
         /* init all */
-        this.window.cancelRequestAnimFrame(pJS.fn.checkAnimFrame);
-        this.window.cancelRequestAnimFrame(pJS.fn.drawAnimFrame);
+        this.window.cancelRequestAnimFrame(this.checkAnimFrame.bind(this));
+        this.window.cancelRequestAnimFrame(this.drawAnimFramebind(this));
         pJS.tmp.source_svg = undefined;
         pJS.tmp.img_obj = undefined;
         pJS.tmp.count_svg = 0;
@@ -1130,5 +1141,5 @@ export default class Pjs {
         /* restart */
         this.start();
 
-    };
+    }
 }

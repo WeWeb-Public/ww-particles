@@ -1,7 +1,8 @@
 <template>
     <div class="ww-particles">
         <div class="ww-particles">
-            <wwObject class="background" v-bind:ww-object="wwObject.content.data.background" ww-category="background"></wwObject>
+            <!-- <wwObject class="background" v-bind:ww-object="wwObject.content.data.background" ww-category="background"></wwObject> -->
+            <div>patate</div>
             <div class="particles-js"></div>
         </div>
     </div>
@@ -49,7 +50,7 @@ export default {
                     data: {}
                 });
             }
-
+            console.log('LAUNCH PARTICLEJS')
             this.particlesJS('particles-js', this.wwObject.content.data.config || this.getConfig(), this.$el);
             // this.loadParticles()
         },
@@ -100,7 +101,6 @@ export default {
             if (canvas != null) {
                 // let pJS = new Pjs({ _element: pJS_tag[0], params: params, window: window })
                 this.pJSDom.push(new Pjs({ _element: pJS_tag[0], params: params, window: window }));
-                console.log('TEST : ', pJS.test())
                 // pJS.eventsListeners();
                 // pJS.start()
             }
