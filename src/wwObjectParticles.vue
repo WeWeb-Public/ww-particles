@@ -714,6 +714,8 @@ export default {
                 }
 
                 this.wwObjectCtrl.update(this.wwObject);
+                this.wwObjectCtrl.globalEdit(result);
+
                 this.init()
                 // this.wwObjectCtrl.globalEdit(result);
             } catch (error) {
