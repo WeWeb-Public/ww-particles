@@ -35,8 +35,6 @@ export default {
             return this.wwObjectCtrl.getEditMode() == 'CONTENT'
         }
     },
-    watch: {
-    },
     methods: {
         init() {
             this.loaded = true
@@ -293,6 +291,32 @@ export default {
         // },
         /* wwManager:start */
         async edit() {
+            let editList = {
+                WWPARTICLES_CONFIG: {
+                    title: {
+                        en: 'Config particles',
+                        fr: 'Configurer les particules'
+                    },
+                    desc: {
+                        en: 'Change colors, shapes, movments, etc.',
+                        fr: 'Changer les couleurs, les formes, le mouvement, etc.'
+                    },
+                    icon: 'wwi wwi-config',
+                    shortcut: 'c',
+                    next: 'WWPARTICLES_CONFIG'
+                }
+            }
+            wwLib.wwPopups.addStory('WWPARTICLES_EDIT', {
+                title: {
+                    en: 'Edit particles',
+                    fr: 'Editer les particules '
+                },
+                type: 'wwPopupEditWwObject',
+                buttons: null,
+                storyData: {
+                    list: editList
+                }
+            })
             wwLib.wwPopups.addStory('WWPARTICLES_CONFIG', {
                 title: {
                     en: 'Color picker',
@@ -620,7 +644,7 @@ export default {
                 }
             })
             let options = {
-                firstPage: 'WWPARTICLES_CONFIG',
+                firstPage: 'WWPARTICLES_EDIT',
                 data: {
                     wwObject: this.wwObject,
                 }
@@ -741,6 +765,7 @@ export default {
 
     },
     beforeDestroyed() {
+        this.removePaticles()
         //window.removeEventListener('resize', this.wwOnResize);
     }
 };
@@ -755,6 +780,10 @@ export default {
         position: absolute;
         top: 0;
         left: 0;
+        height: 100%;
+        width: 100%;
+    }
+    .particles-js {
         height: 100%;
         width: 100%;
     }
