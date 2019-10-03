@@ -120,8 +120,6 @@ export default {
         },
         removePaticles() {
 
-            console.log("destroy")
-
             /* pJS elements */
             var pJS_tag = element[0].getElementsByClassName('particles-js'),
                 pJS_canvas_class = 'particles-js-canvas-el',
