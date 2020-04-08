@@ -1,0 +1,28 @@
+{
+	"componentPath": "./src/wwObjectParticles.vue",
+	"content": {
+		"type": "ww-particles",
+		"data": {}
+	},
+	"upsales": {
+		"wwAnalytics": {
+			"click": false
+		}
+	},
+	"cmsOptions": {
+		"wwObjectHover": {},
+		"wwObjectMenu": {
+			"items": [
+				{
+					"name": "OPTIONS",
+					"text": {
+						"en": "Options",
+						"fr": "Options"
+					},
+					"icon": "wwi wwi-edit-other",
+					"action": "edit"
+				}
+			]
+		}
+	}
+}
